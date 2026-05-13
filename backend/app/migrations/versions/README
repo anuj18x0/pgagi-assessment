@@ -1,0 +1,4 @@
+# Alembic versions directory
+# Migration scripts will be generated here via:
+#   alembic revision --autogenerate -m "description"
+# NEVER auto-apply in production — always review scripts first.
