@@ -1,20 +1,14 @@
-from google import genai
 from typing import List, Dict, Any, Optional
-import json
 import logging
-from pydantic import ValidationError
 from app.schemas.resume import ExtractedSkills
-from app.core.config import settings
+from app.services.gemini_service import GeminiService
 
 logger = logging.getLogger(__name__)
 
 class GeminiExtractor:
-    def __init__(self, api_key: str = None):
-        self.api_key = api_key or settings.GEMINI_API_KEY
-        if not self.api_key:
-            raise ValueError("GEMINI_API_KEY must be provided")
-        self.client = genai.Client(api_key=self.api_key)
-        self.model_id = "gemini-2.0-flash"
+    def __init__(self):
+        self.gemini = GeminiService()
+        self.model_id = "gemini-2.5-flash"
 
     async def extract_skills(self, text: str) -> ExtractedSkills:
         """
@@ -41,23 +35,15 @@ class GeminiExtractor:
         """
 
         try:
-            response = self.client.models.generate_content(
-                model=self.model_id,
-                contents=prompt,
-                config={
-                    "response_mime_type": "application/json"
-                }
+            data = await self.gemini.generate_json(
+                prompt=prompt,
+                model_id=self.model_id
             )
-            
-            data = json.loads(response.text)
             return ExtractedSkills(**data)
-        except (ValidationError, json.JSONDecodeError) as e:
-            logger.error(f"Failed to parse Gemini response: {e}")
+        except Exception as e:
+            logger.error(f"Failed to extract skills: {e}")
             # Fallback for poor resumes or parsing errors
             return ExtractedSkills(skills=[], technologies=[], years_experience=0, domains=[])
-        except Exception as e:
-            logger.error(f"Gemini API error: {e}")
-            raise
 
     def infer_domain(self, extracted: ExtractedSkills) -> str:
         """
@@ -72,9 +58,7 @@ class GeminiExtractor:
         if any(kw in all_indicators for kw in ["django", "flask", "fastapi", "go", "java", "spring", "sql", "postgres"]):
             return "Backend Developer"
         if any(kw in all_indicators for kw in ["react", "vue", "angular", "css", "html", "javascript", "typescript", "frontend"]):
-            if "Backend Developer" in self.infer_domain(extracted): # Simple check for fullstack
-                return "Fullstack Developer"
-            return "Fullstack Developer" # Defaulting for now if web-heavy
+            return "Fullstack Developer"
         if any(kw in all_indicators for kw in ["spark", "hadoop", "airflow", "data engineering", "etl"]):
             return "Data Engineer"
             
@@ -86,15 +70,12 @@ class GeminiExtractor:
         """
         queries = [f"Core {role} interview questions and fundamentals"]
         
-        # Add tech-specific queries
         for tech in extracted.technologies[:2]:
             queries.append(f"Applied {tech} concepts and advanced questions for {role}")
             
-        # Add skill-specific queries
         for skill in extracted.skills[:1]:
             queries.append(f"{skill} best practices and scenario-based questions")
 
-        # Fallback for poor resumes
         if len(extracted.skills) < 3 and len(extracted.technologies) < 3:
             logger.warning("Poor resume detected, using fallback queries")
             queries.append(f"Standard {role} technical interview preparation")

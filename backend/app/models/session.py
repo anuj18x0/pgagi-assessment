@@ -7,7 +7,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 
 class SessionStatus(str, Enum):
-    PENDING = "pending"
+    CREATED = "created"
+    RESUME_UPLOADED = "resume_uploaded"
+    STARTED = "started"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
     CANCELLED = "cancelled"

@@ -21,7 +21,7 @@ async def test_gemini_extraction_logic(mock_gemini_response):
     """
     Unit test for Gemini extraction and domain inference.
     """
-    extractor = GeminiExtractor(api_key="fake_key")
+    extractor = GeminiExtractor()
     
     with patch.object(extractor.client.models, 'generate_content') as mock_gen:
         mock_gen.return_value.text = json.dumps(mock_gemini_response.model_dump())
@@ -36,7 +36,7 @@ async def test_gemini_extraction_logic(mock_gemini_response):
 
 @pytest.mark.asyncio
 async def test_rag_query_builder():
-    extractor = GeminiExtractor(api_key="fake_key")
+    extractor = GeminiExtractor()
     extracted = ExtractedSkills(
         skills=["Distributed Systems"],
         technologies=["Kafka", "Go"],

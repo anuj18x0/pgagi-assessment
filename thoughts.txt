@@ -1,0 +1,7 @@
+user's camera should be on and facing towards the screen , log the time he looks away from screen
+should stay in the same tab throughout the interview
+should not use any other application during the interview
+should not copy and paste any text during the interview
+should not alt tab during the interview
+should not use any external help during the interview
+no screen split allowed
