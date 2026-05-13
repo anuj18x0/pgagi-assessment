@@ -6,13 +6,10 @@ import json
 from pathlib import Path
 from typing import List, Dict, Any
 
-# Add src to path
-sys.path.append(str(Path(__file__).parent.parent / "src"))
-
-from loader import PDFLoader
-from chunker import RecursiveChunker
-from embedder import GoogleEmbedder
-from vectorstore import PineconeStore
+from app.rag.src.loader import PDFLoader
+from app.rag.src.chunker import RecursiveChunker
+from app.rag.src.embedder import GoogleEmbedder
+from app.rag.src.vectorstore import PineconeStore
 
 def generate_id(text: str, metadata: Dict[str, Any]) -> str:
     """

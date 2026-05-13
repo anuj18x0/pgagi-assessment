@@ -1,8 +1,8 @@
 from typing import List, Dict, Any, Optional
 import json
 from google import genai
-from embedder import GoogleEmbedder
-from vectorstore import PineconeStore
+from app.rag.src.embedder import GoogleEmbedder
+from app.rag.src.vectorstore import PineconeStore
 import logging
 
 logger = logging.getLogger(__name__)
@@ -65,7 +65,7 @@ class RAGRetriever:
 class ReRanker:
     def __init__(self, client: genai.Client):
         self.client = client
-        self.model_name = "gemini-1.5-flash"
+        self.model_name = "gemini-2.5-flash"
 
     async def rerank(self, query_context: str, chunks: List[Dict[str, Any]], candidate_profile: Dict[str, Any]) -> List[Dict[str, Any]]:
         """
